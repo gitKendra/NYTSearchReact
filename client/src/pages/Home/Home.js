@@ -1,40 +1,47 @@
 import React, { Component } from "react";
 import API from "../../utils/API";
-import { Link } from "react-router-dom";
 import { Container } from "../../components/Grid";
 import { List, ListItem } from "../../components/List";
 import { Input, FormBtn } from "../../components/Form";
 import Panel from "../../components/Panel/Panel";
 import SearchResults from "../../components/SearchResults/SearchResults";
-import SaveBtn from "../../components/SaveBtn";
+import DeleteBtn from "../../components/DeleteBtn";
+import moment from "moment";
 
 class Home extends Component {
   state = {
     articles: [],
     results: [],
-    topic: "Bitcoin",
+    topic: "",
     start: "0",
     end: "0"
   };
 
-  // componentDidMount() {
-  //   this.loadArticles();
-  // }
+  componentDidMount() {
+    this.loadArticles();
+  }
 
-  // // Load articles saved in database
-  // loadArticles = () => {
-  //   API.getArticles()
-  //     .then(res =>
-  //       this.setState({ articles: res.data, topic: "", start: "0", end: "0" })
-  //     )
-  //     .catch(err => console.log(err));
-  // };
+  // Load articles saved in database
+  loadArticles = () => {
+    API.getArticles()
+      .then(res =>
+        this.setState({ articles: res.data, topic: "", start: "0", end: "0" })
+      )
+      .catch(err => console.log(err));
+  };
 
   handleSaveArticle = article => {
     console.log("Saving Article")
     API.saveArticle(article)
       .then(res => this.loadArticles())
       .catch(err => console.log(err));
+  };
+
+  deleteArticle = id => {
+    console.log("Delete article with id: "+id);
+    API.deleteArticle(id)
+      .then(res => this.loadArticles())
+      .catch(err => console.log(err));    
   };
 
   handleInputChange = event => {
@@ -71,7 +78,6 @@ class Home extends Component {
         .catch(err => console.log(err));
     }
   };
-
 
   render() {
     return (
@@ -112,24 +118,21 @@ class Home extends Component {
           </Panel>
 
           <Panel header="Results">
-
-          {this.state.results.length ? (
-              <SearchResults results={this.state.results} fn={this.handleSaveArticle}/>
-            ) : (
-              <h3>No Results to Display</h3>
-            )}          
+            {this.state.results.length ? (
+                <SearchResults results={this.state.results} fn={this.handleSaveArticle}/>
+              ) : (
+                <h3>No Results to Display</h3>
+              )}          
           </Panel>
 
-       {/*   <Panel header="Saved Articles">
+         <Panel header="Saved Articles">
             {this.state.articles.length ? (
               <List>
                 {this.state.articles.map(article => (
                   <ListItem key={article._id}>
-                    <Link to={"/articles/" + article._id}>
-                      <strong>
-                        {article.topic} by {article.start}
-                      </strong>
-                    </Link>
+                    <a href={article.url} rel="noopener noreferrer" target='_blank'>
+                      <strong>{article.topic}</strong> Published: {moment(article.date).format("ll")}
+                    </a>
                     <DeleteBtn onClick={() => this.deleteArticle(article._id)} />
                   </ListItem>
                 ))}
@@ -137,7 +140,7 @@ class Home extends Component {
             ) : (
               <h3>No Results to Display</h3>
             )}
-          </Panel> */}
+          </Panel>
       </Container>
     );
   }
